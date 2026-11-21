@@ -714,120 +714,198 @@ PINS = [
 
 # ------------------------------------------------------------- page assembly
 def render_page(cv):
+    # ---- v4 content: 36 stories (3 leads + 10 cards + 23 briefs) ----
+    _nums = [
+        ('0', 'climate deal agreed at COP31'),
+        ('12', 'killed in Ukraine strikes'),
+        ('42', 'injured in Kryvyi Rih strike'),
+        ('3', 'missiles downed over Riyadh'),
+        ('92,000', 'people at COP31, the largest'),
+        ('300,000+', 'evacuated before Akvan'),
+    ]
+    _regs = [('EUROPE', 9, BLUE), ('AMERICAS', 14, RED), ('ASIA', 4, GOLD),
+             ('MIDEAST', 3, TEAL), ('AFRICA', 2, GREEN), ('OCEANIA', 2, PURP),
+             ('WORLD', 2, BROWN)]
+
+    def _renum(kick, n):
+        return str(n) + ' ' + kick.split(' ', 1)[1]
+
+    _cop31 = LEADS[1]
+    _riyadh = LEADS[0]
+    _kyivc = CARDS[1]
+    _bep = LEADS[2]
+    _leads = [
+        (_cop31[0], _renum(_cop31[1], 1), _cop31[2], _cop31[3], _cop31[4]),
+        (_kyivc[0], _renum(_kyivc[1], 2), _kyivc[2],
+         'Russia\u2019s biggest strike of the war: 400+ drones and 110+ missiles '
+         'overnight; 12 killed, 82 hurt in Kyiv. Three bridges over the Dnipro '
+         'damaged.', _kyivc[4]),
+        (_riyadh[0], _renum(_riyadh[1], 3), _riyadh[2], _riyadh[3], _riyadh[4]),
+    ]
+    _cards = [
+        (CARDS[0][0], _renum(CARDS[0][1], 4), CARDS[0][2], CARDS[0][3], CARDS[0][4]),
+        (CARDS[2][0], _renum(CARDS[2][1], 5), CARDS[2][2], CARDS[2][3], CARDS[2][4]),
+        (_bep[0], _renum(_bep[1], 6), _bep[2],
+         'Capture burn 19:24 CET: four thrusters, 37 min. First two orbiters '
+         'at Mercury.', _bep[4]),
+        (CARDS[3][0], _renum(CARDS[3][1], 7), CARDS[3][2], CARDS[3][3], CARDS[3][4]),
+        (CARDS[4][0], _renum(CARDS[4][1], 8), CARDS[4][2], CARDS[4][3], CARDS[4][4]),
+        (CARDS[5][0], _renum(CARDS[5][1], 9), CARDS[5][2], CARDS[5][3], CARDS[5][4]),
+        (CARDS[6][0], _renum(CARDS[6][1], 10), CARDS[6][2], CARDS[6][3], CARDS[6][4]),
+        (CARDS[7][0], _renum(CARDS[7][1], 11), CARDS[7][2], CARDS[7][3], CARDS[7][4]),
+        (CARDS[8][0], _renum(CARDS[8][1], 12), CARDS[8][2], CARDS[8][3], CARDS[8][4]),
+        (CARDS[9][0], _renum(CARDS[9][1], 13), CARDS[9][2], CARDS[9][3], CARDS[9][4]),
+    ]
+    _briefs = BRIEFS[:23]
+    _continents = [
+        [(15, 12), (60, 6), (110, 10), (125, 22), (115, 36), (95, 48), (70, 44), (40, 40), (15, 26)],
+        [(120, 50), (150, 46), (165, 58), (155, 76), (130, 76), (118, 62)],
+        [(245, 8), (280, 6), (295, 15), (285, 26), (260, 28), (245, 18)],
+        [(255, 33), (295, 30), (310, 44), (300, 66), (275, 70), (258, 52)],
+        [(300, 6), (380, 4), (450, 10), (470, 22), (440, 35), (400, 40), (350, 35), (315, 26), (300, 15)],
+        [(420, 58), (460, 55), (470, 66), (435, 70)],
+    ]
+    _pins = [(1, 290, 18), (2, 292, 15), (3, 330, 42), (4, 272, 12), (5, 262, 7),
+             (7, 338, 40), (8, 84, 22), (9, 258, 18), (10, 102, 33), (11, 375, 42),
+             (12, 72, 34), (13, 94, 38)]
+    _dc = ['Kyiv bridges hit \u2014 Fri 20 Nov',
+           'Cyclone Akvan landfall \u2014 Fri 20 Nov',
+           'ICJ Myanmar ruling \u2014 Thu 19 Nov',
+           'Shenzhen trilateral \u2014 Thu 19 Nov',
+           'Anthropic $93.5bn IPO \u2014 Thu 19 Nov',
+           'Wall Street correction \u2014 Fri 20 Nov']
     # top bar
     cv.rect(0, 0, W, 22, RED)
-    draw_text(cv, 'THE WORLD IN ONE DAY', 10, 16, 12, 'sans-bold', (255, 255, 255))
-    _rt = '42 STORIES · 7 REGIONS · SATURDAY 21 NOVEMBER 2026'
-    draw_text(cv, _rt, 1014 - text_width(_rt, 11, 'sans-bold'), 16, 11, 'sans-bold',
-              (255, 255, 255))
-    # masthead
-    _mh = 'Saturday 21 November 2026'
-    draw_text(cv, _mh, (W - text_width(_mh, 52, 'serif')) / 2, 80, 52, 'serif', INK)
-    cv.rect(10, 88, 1004, 2, NAVY)
-    cv.rect(10, 92, 1004, 1, NAVY)
+    draw_text(cv, 'THE WORLD IN ONE DAY', 10, 15, 11, 'sans-bold', (255, 255, 255))
+    _tr = '36 STORIES \u00b7 7 REGIONS \u00b7 SATURDAY 21 NOVEMBER 2026'
+    draw_text(cv, _tr, W - 10 - text_width(_tr, 11, 'sans-bold'), 15, 11, 'sans-bold', (255, 255, 255))
+    # masthead (68px serif-bold, shrink to fit)
+    _mt = 'Saturday 21 November 2026'
+    _ms = 68
+    while text_width(_mt, _ms, 'serif-bold') > 1004 and _ms > 40:
+        _ms -= 1
+    draw_text(cv, _mt, (W - text_width(_mt, _ms, 'serif-bold')) / 2, 92, _ms, 'serif-bold', NAVY)
+    cv.rect(10, 100, 1004, 2, NAVY)
+    cv.rect(10, 104, 1004, 1, NAVY)
     # sub-headline
-    _sh = ('Riyadh intercepts three missiles · COP31 into overtime · '
-           'BepiColombo at Mercury · Rutte in Warsaw')
-    draw_text(cv, _sh, (W - text_width(_sh, 13, 'sans')) / 2, 110, 13, 'sans', INK,
-              shear=0.18)
+    _sh = ('COP31 into overtime \u00b7 Russia\u2019s biggest strike hits Kyiv \u00b7 '
+           'Riyadh intercepts three missiles \u00b7 BepiColombo at Mercury')
+    draw_text(cv, _sh, (W - text_width(_sh, 13, 'sans')) / 2, 124, 13, 'sans', INK)
     # numbers strip
-    _cw = 1004 / 6
-    for i, (num, cap) in enumerate(NUMBERS):
+    _cw = (W - 20) / 6
+    for i, (num, cap) in enumerate(_nums):
         _cx = 10 + i * _cw
-        draw_text(cv, num, _cx + (_cw - text_width(num, 24, 'sans-bold')) / 2, 146,
-                  24, 'sans-bold', NAVY)
-        draw_text(cv, cap, _cx + (_cw - text_width(cap, 9, 'sans')) / 2, 162,
-                  9, 'sans', GREY)
+        draw_text(cv, num, _cx + (_cw - text_width(num, 32, 'sans-bold')) / 2, 164, 32, 'sans-bold', NAVY)
+        draw_text(cv, cap, _cx + (_cw - text_width(cap, 10, 'sans')) / 2, 180, 10, 'sans', GREY)
         if i:
-            cv.rect(int(_cx), 122, 1, 42, LGREY)
+            cv.rect(_cx, 134, 1, 48, LGREY)
     # region bar
-    _rx = 10.0
-    for (name, count, col) in REGIONS:
-        _seg = 1004 * count / 42
-        cv.rect(int(_rx), 170, int(_seg), 20, col)
-        _lab = '%s %d' % (name, count)
-        _fs = 9.0
-        while text_width(_lab, _fs, 'sans-bold') > _seg - 6 and _fs > 6.5:
-            _fs -= 0.5
-        if text_width(_lab, _fs, 'sans-bold') <= _seg - 6:
-            draw_text(cv, _lab, _rx + (_seg - text_width(_lab, _fs, 'sans-bold')) / 2,
-                      184, _fs, 'sans-bold', (255, 255, 255))
-        else:
-            _c = str(count)
-            draw_text(cv, _c, _rx + (_seg - text_width(_c, 9, 'sans-bold')) / 2, 184,
-                      9, 'sans-bold', (255, 255, 255))
-        _rx += _seg
+    _tot = sum(c for _, c, _ in _regs)
+    _rx = 10
+    for name, cnt, col in _regs:
+        _w = (W - 20) * cnt / _tot
+        cv.rect(_rx, 186, _w, 16, col)
+        _lab = name + ' ' + str(cnt)
+        _ls = 9
+        while text_width(_lab, _ls, 'sans-bold') > _w - 6 and _ls > 7:
+            _ls -= 0.5
+        draw_text(cv, _lab, _rx + (_w - text_width(_lab, _ls, 'sans-bold')) / 2, 198, _ls, 'sans-bold', (255, 255, 255))
+        _rx += _w
     # leads
-    _lw, _lg = 330, 12
-    for i, (kind, kick, head, body, src) in enumerate(LEADS):
-        _x = 10 + i * (_lw + _lg)
-        _y = 200
-        art(cv, kind, _x, _y, _lw, 108)
-        cv.rect(_x, _y + 108, _lw, 16, RED)
-        draw_text(cv, kick, _x + 6, _y + 120, 10, 'sans-bold', (255, 255, 255))
-        draw_block(cv, head, _x, _y + 146, _lw, 17, 'serif-bold', INK, leading=20)
-        draw_block(cv, body, _x, _y + 180, _lw, 9.5, 'sans', INK, leading=11.5)
-        draw_text(cv, src, _x, _y + 216, 8, 'sans', GREY)
+    _lw = (W - 20 - 2 * 12) / 3
+    for i, (kind, kick, head, body, src) in enumerate(_leads):
+        _x = 10 + i * (_lw + 12)
+        _y = 208
+        art(cv, kind, _x, _y, _lw, 150)
+        if kind == 'cop31':
+            cv.rect(_x + 128, _y + 18, 74, 18, RED)
+            draw_text(cv, 'NO DEAL', _x + 145, _y + 31, 10, 'sans-bold', (255, 255, 255))
+            cv.circle(_x + 175, _y + 95, 12, (255, 255, 255))
+            cv.circle(_x + 195, _y + 90, 15, (255, 255, 255))
+            cv.circle(_x + 215, _y + 97, 11, (255, 255, 255))
+        if kind == 'kyiv':
+            cv.circle(_x + 290, _y + 30, 12, (240, 235, 210))
+            for _sx, _sy in [(30, 30), (70, 60), (110, 25), (210, 40), (250, 80), (300, 60), (60, 90), (190, 80)]:
+                cv.circle(_x + _sx, _y + _sy, 2, (255, 210, 90))
+        cv.rect(_x, _y + 150, _lw, 16, RED)
+        draw_text(cv, kick, _x + 6, _y + 162, 10, 'sans-bold', (255, 255, 255))
+        draw_block(cv, head, _x, _y + 186, _lw, 19, 'serif-bold', INK, leading=22)
+        draw_block(cv, body, _x, _y + 232, _lw, 10.5, 'sans', INK, leading=13)
+        draw_text(cv, src, _x, _y + 276, 9, 'sans', GREY)
     # cards
-    _cw2, _cg = 198, 8
-    for i, (kind, kick, head, body, src) in enumerate(CARDS):
+    _cw2 = (W - 20 - 4 * 6) / 5
+    _cg = 6
+    for i, (kind, kick, head, body, src) in enumerate(_cards):
         _row, _col = divmod(i, 5)
         _x = 10 + _col * (_cw2 + _cg)
-        _y = 428 + _row * 134
-        art(cv, kind, _x, _y, _cw2, 48)
-        draw_text(cv, kick, _x, _y + 60, 8.5, 'sans-bold', RED)
-        draw_block(cv, head, _x, _y + 78, _cw2, 11, 'sans-bold', INK, leading=13)
-        draw_block(cv, body, _x, _y + 106, _cw2, 8, 'sans', INK, leading=10.5)
-        draw_text(cv, src, _x, _y + 128, 7.5, 'sans', GREY)
-    # map + date check
-    _my = 700
-    draw_text(cv, 'WHERE IT HAPPENED', 10, _my + 12, 10, 'sans-bold', NAVY)
-    for pts in CONTINENTS:
-        cv.poly([(10 + px, _my + 16 + py) for (px, py) in pts], (216, 201, 163))
-    for (n, px, py) in PINS:
-        _px, _py = 10 + px, _my + 16 + py
-        cv.circle(_px, _py, 6, RED)
-        _d = str(n)
-        draw_text(cv, _d, _px - text_width(_d, 7, 'sans-bold') / 2, _py + 3, 7,
-                  'sans-bold', (255, 255, 255))
-    draw_text(cv, 'Pins 1–13 mark the drawn stories. No. 3 is in space: Mercury.',
-              10, _my + 108, 8.5, 'sans', GREY)
-    _dx, _dw = 510, 504
-    cv.rect(_dx, _my, _dw, 2, RED)
-    cv.rect(_dx, _my + 110, _dw, 2, RED)
-    cv.rect(_dx, _my, 2, 112, RED)
-    cv.rect(_dx + _dw - 2, _my, 2, 112, RED)
-    draw_text(cv, 'DATE CHECK — WHAT WE LEFT OUT', _dx + 12, _my + 19, 11, 'sans-bold', RED)
-    _dy = draw_block(cv, 'ICJ Myanmar ruling (19 Nov) · Shenzhen trilateral (19 Nov) · '
-                     'Mongolia resigns (19 Nov)', _dx + 12, _my + 37, _dw - 24, 9.5,
-                     'sans', INK, leading=13)
-    _dy = draw_block(cv, 'Kerch Bridge strikes (16–19 Nov) — no new strike on 21 Nov.',
-                     _dx + 12, _dy + 2, _dw - 24, 9.5, 'sans', INK, leading=13)
-    draw_block(cv, 'NOT YET HAPPENED: COP31 final deal · BepiColombo capture '
-               'confirmation · Rutte visit outcome', _dx + 12, _dy + 2, _dw - 24, 9.5,
-               'sans-bold', DRED, leading=13)
+        _y = 494 + _row * 148
+        art(cv, kind, _x, _y, _cw2, 58)
+        if kind == 'anthropic':
+            cv.rect(_x, _y, _cw2, 58, PAPER)
+            _big = '$93.5bn'
+            draw_text(cv, _big, _x + (_cw2 - text_width(_big, 18, 'sans-bold')) / 2, _y + 26, 18, 'sans-bold', (150, 100, 20))
+            _st = 'CLAIM ONLY'
+            _sw = text_width(_st, 9, 'sans-bold') + 14
+            cv.rect(_x + (_cw2 - _sw) / 2, _y + 36, _sw, 14, RED)
+            draw_text(cv, _st, _x + (_cw2 - text_width(_st, 9, 'sans-bold')) / 2, _y + 46, 9, 'sans-bold', (255, 255, 255))
+        draw_text(cv, kick, _x, _y + 70, 8.5, 'sans-bold', RED)
+        draw_block(cv, head, _x, _y + 86, _cw2, 12, 'sans-bold', INK, leading=14)
+        draw_block(cv, body, _x, _y + 112, _cw2, 8.5, 'sans', INK, leading=11.5)
+        draw_text(cv, src, _x, _y + 140, 8, 'sans', GREY)
+    # dotted map + date check
+    _my = 800
+
+    def _inside(px, py, poly):
+        _ins = False
+        _j = len(poly) - 1
+        for _i in range(len(poly)):
+            _xi, _yi = poly[_i]
+            _xj, _yj = poly[_j]
+            if ((_yi > py) != (_yj > py)) and (px < (_xj - _xi) * (py - _yi) / (_yj - _yi) + _xi):
+                _ins = not _ins
+            _j = _i
+        return _ins
+
+    draw_text(cv, 'WHERE IT HAPPENED', 10, _my + 12, 9, 'sans-bold', NAVY)
+    for _gy in range(0, 68, 5):
+        for _gx in range(0, 490, 5):
+            for _poly in _continents:
+                if _inside(_gx, _gy, _poly):
+                    cv.circle(10 + _gx, _my + 14 + _gy, 1.5, BLUE)
+                    break
+    for _n, _px, _py in _pins:
+        cv.circle(10 + _px, _my + 14 + _py, 6, RED)
+        _ns = str(_n)
+        draw_text(cv, _ns, 10 + _px - text_width(_ns, 7, 'sans-bold') / 2, _my + 14 + _py + 2.5, 7, 'sans-bold', (255, 255, 255))
+    cv.rect(510, _my, 504, 2, RED)
+    cv.rect(510, _my + 78, 504, 2, RED)
+    cv.rect(510, _my, 2, 80, RED)
+    cv.rect(1012, _my, 2, 80, RED)
+    draw_text(cv, 'DATE CHECK \u2014 WHAT WE LEFT OUT', 520, _my + 14, 10, 'sans-bold', RED)
+    for i, _item in enumerate(_dc):
+        _col = 0 if i < 3 else 1
+        _ix = 520 if _col == 0 else 772
+        _iy = _my + 30 + (i % 3) * 16
+        draw_text(cv, 'x', _ix, _iy, 9, 'sans-bold', RED)
+        draw_text(cv, _item, _ix + 12, _iy, 8.5, 'sans', INK)
+    draw_text(cv, 'NOT YET: COP31 deal \u00b7 BepiColombo confirmation \u00b7 Rutte outcome', 520, _my + 74, 8, 'sans', GREY)
     # briefs
-    draw_text(cv, 'ALSO ON SATURDAY 21 NOVEMBER — 29 MORE STORIES', 10, 820, 11,
-              'sans-bold', NAVY)
-    cv.rect(10, 824, 1004, 1, NAVY)
-    for i, (city, text, src) in enumerate(BRIEFS):
-        _col = 0 if i < 15 else 1
+    draw_text(cv, 'ALSO ON SATURDAY 21 NOVEMBER \u2014 23 MORE STORIES', 10, 890, 11, 'sans-bold', NAVY)
+    cv.rect(10, 894, 1004, 1, NAVY)
+    for i, (city, text, src) in enumerate(_briefs):
+        _col = 0 if i < 12 else 1
         _bx = 10 if _col == 0 else 519
-        _by = 836 + (i % 15) * 11
-        _pre = city + ' – '
-        draw_text(cv, _pre, _bx, _by, 8.5, 'sans-bold', INK)
+        _by = 904 + (i % 12) * 9.5
+        _pre = city + ' \u2013 '
+        draw_text(cv, _pre, _bx, _by, 9, 'sans-bold', INK)
         _tx = text + ' (' + src + ')'
-        draw_text(cv, _tx, _bx + text_width(_pre, 8.5, 'sans-bold'), _by, 8.5,
-                  'sans', INK)
-    # footer
-    cv.rect(10, 996, 1004, 1, RED)
+        draw_text(cv, _tx, _bx + text_width(_pre, 9, 'sans-bold'), _by, 9, 'sans', INK)
+    # footer (one line)
+    cv.rect(10, 1012, 1004, 1, RED)
     _f1 = ('Every story here happened, or was first reported, on Saturday 21 '
-           'November 2026 in at least one time zone. Claims are attributed; '
-           'forecasts are flagged.')
-    draw_text(cv, _f1, (W - text_width(_f1, 9, 'sans')) / 2, 1007, 9, 'sans', GREY)
-    _f2 = ('Sources: Reuters · AP · BBC · AFP · European Commission · US DOJ · '
-           'UKMTO · ESA · IMD · VDH · House Foreign Affairs Committee')
-    draw_text(cv, _f2, (W - text_width(_f2, 8, 'sans')) / 2, 1017, 8, 'sans', GREY)
+           'November 2026. Sources named beside each story. Original drawings, '
+           'not photographs.')
+    draw_text(cv, _f1, (W - text_width(_f1, 8, 'sans')) / 2, 1021, 8, 'sans', GREY)
 
 
 def main():
